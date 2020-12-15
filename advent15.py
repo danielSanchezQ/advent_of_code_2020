@@ -5,7 +5,7 @@ initial_data = [1,20,11,6,12,0]
 
 
 class State(object):
-    __slots__ = ["visited", "counter", "i", "last"]
+    __slots__ = ["counter", "i", "last"]
 
     def __init__(self, input):
         self.counter = defaultdict(int)
