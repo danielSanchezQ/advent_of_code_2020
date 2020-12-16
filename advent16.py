@@ -47,8 +47,8 @@ def all_posible_rules(rules, tickets):
         ]
 
 
-def reduce_rules(posbile_rules):
-    ordered_rules = sorted(enumerate(posbile_rules), key=lambda x: len(x[1]))
+def reduce_rules(possible_rules):
+    ordered_rules = sorted(enumerate(possible_rules), key=lambda x: len(x[1]))
     positions = [None] * 20
     visited = set()
     for i, rule in ordered_rules:
