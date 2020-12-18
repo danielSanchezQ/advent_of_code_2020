@@ -1,66 +1,43 @@
-import ast
-import operator
+# override operator precedence, we just need to wrap incoming values
+class OverloadedValue(object):
+    def __init__(self, value):
+        self.value = int(value)
+
+    def __mul__(self, other):
+        return OverloadedValue(self.value * other.value)
+
+    def __add__(self, other):
+        return OverloadedValue(self.value + other.value)
+
+    def __repr__(self):
+        return f"OverloadedValue({self.value})"
+
+    __sub__ = __mul__
+    __pow__ = __add__
 
 
-def eval_module(expr: ast.Module):
-    return eval_expr(expr.body[0].value)
+def replace_line(l):
+    return l.rstrip().replace("(", "( ").replace(")", " )").replace("*", "-")
 
 
-def eval_constant(constant: ast.Constant):
-    return constant.value
+def parse_data(l: str):
+    return " ".join(
+        str(OverloadedValue(int(c))) if c.isdigit() else c for c in replace_line(l).split()
+    )
 
 
-def binop_constant(binop: ast.BinOp):
-    return operation[type(binop.op)](eval_expr(binop.left), eval_expr(binop.right))
+def load_data(f):
+    return map(parse_data, f)
 
 
-def binop_left(binop: ast.BinOp):
-    binop.left.left.value = operation[type(binop.op)](binop.left.left.value, binop.right.value)
-    return eval_expr(binop.left)
-
-
-def binop_right(binop: ast.BinOp):
-    binop.right.left.value = operation[type(binop.op)](binop.right.left.value, binop.left.value)
-    return eval_expr(binop.right)
-
-
-def eval_binop(binop: ast.BinOp):
-    return binop_operation[(type(binop.left), type(binop.right))](binop)
-
-
-binop_operation = {
-    (ast.Constant, ast.Constant): binop_constant,
-    (ast.BinOp, ast.Constant): binop_left,
-    (ast.Constant, ast.BinOp): binop_right,
-}
-
-operation = {
-    ast.Add: operator.add,
-    ast.Mult: operator.mul
-}
-
-eval_nodes = {
-    ast.Module: eval_module,
-    ast.Constant: eval_constant,
-    ast.BinOp: eval_binop
-}
-
-
-def eval_expr(node: ast.AST):
-    return eval_nodes[type(node)](node)
-
-
-def load_data(stream):
-    return (ast.parse(line.rstrip(), mode='eval') for line in stream)
-
-
-def part_1(ast_stream):
-    return sum(map(eval_expr, ast_stream))
+def solve(f):
+    return sum(eval(l).value for l in f)
 
 
 if __name__ == "__main__":
-    # exp = ast.parse("5 + (9 + (7 + 5 + 3 * 8 + 4 * 6) + 9 * 8 * 7)")
-    exp = ast.parse("5 + (8 * 3 + 9 + 3 * 4 * 3)")
-    print(eval_expr(exp))
-    # with open("./input/advent18.txt") as f:
-        # print(part_1(load_data(f)))
+    with open("./input/advent18.txt") as f:
+        data = list(load_data(f))
+        # part 1
+        print(solve(data))
+        # part 2
+        print(solve((l.replace("+", "**") for l in data)))
