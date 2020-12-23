@@ -1,5 +1,5 @@
 import itertools
-from math import  prod
+from math import prod
 
 
 initial_state = [
